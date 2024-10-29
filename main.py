@@ -19,7 +19,7 @@ def ask(prompt: str):
         headers = {"Content-Type": "application/json"}
         res = requests.post(
             'http://127.0.0.1:11434/api/generate',
-            json={"model": "llama3.2:1b", "prompt": prompt},
+            json={"model": "llama3.2:1b", "prompt": prompt, "stream": False},
             headers=headers,
             timeout=10  
             )
