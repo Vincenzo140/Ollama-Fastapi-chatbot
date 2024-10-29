@@ -1,0 +1,7 @@
+rich
+fastapi
+requests
+uvicorn
+fastapi[standard]
+uvloop
+httptools
