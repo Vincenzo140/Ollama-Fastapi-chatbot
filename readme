@@ -1,0 +1,37 @@
+# Guia de Instalação do Ollama
+
+Este documento descreve o processo para baixar e instalar o Ollama, uma ferramenta essencial para rodar modelos de linguagem avançados como o "llama3.2". Siga as instruções abaixo para garantir uma instalação sem complicações.
+
+## Requisitos
+- Sistema operacional compatível (Linux ou macOS).
+- Acesso ao terminal e permissões de superusuário (root) para instalação.
+
+## Passos para Instalação
+
+### 1. Baixar e Instalar o Ollama
+Abra o terminal e execute o comando abaixo para baixar e instalar o Ollama:
+
+```sh
+curl -fsSL https://ollama.com/install.sh | sh
+```
+
+Este comando utilizará `curl` para baixar o script de instalação do Ollama e o executará automaticamente.
+
+### 2. Executar o Modelo "llama3.2"
+Após a instalação do Ollama, você poderá executar o modelo "llama3.2" usando o comando:
+
+```sh
+ollama run llama3.2:1b
+```
+
+Este comando iniciará o modelo "llama3.2" com 1 bilhão de parâmetros, permitindo interações avançadas com a IA.
+
+## Observações
+- Certifique-se de ter uma conexão com a internet estável durante a instalação.
+- Caso encontre problemas de permissão, tente rodar o comando com `sudo` para garantir os privilégios necessários.
+
+## Recursos Adicionais
+- [Documentação Oficial do Ollama](https://ollama.com/docs) – Consulte para obter detalhes adicionais sobre outros modelos disponíveis e configurações avançadas.
+
+Agora você está pronto para explorar o potencial do Ollama e seus modelos de IA!
+
