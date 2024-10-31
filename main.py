@@ -1,33 +1,33 @@
 from fastapi import FastAPI, status, Response
 import requests
 from logger import AppLogger
-from pydantic import BaseModel
 from typing import Union
 
 logger = AppLogger().get_logger()
 
-app = FastAPI()
+app = FastAPI(title="api do ollama", description="api que contempla o ollama com o modelo da meta llama3.2:1b, isso é apenas um setup, não ha treinamento de modelos", version= "v.0.0.10")
+    
+# @app.get('/')
+# async def root():
+#     return {'message': 'Welcome to the FastAPI application!'}
 
-class Prompt(BaseModel):
-    prompt: Union[str, int] = None
+storage_response = []
 
-@app.get('/')
-async def root():
-    return {'message': 'Welcome to the FastAPI application!'}
-
-@app.get("/ask", response_model= Prompt, status_code=status.HTTP_201_CREATED) 
-def ask(prompt: str) -> Prompt:
+@app.get("/ask", status_code=status.HTTP_201_CREATED) 
+def ask(prompt: Union[str, int]):
     logger.info(f"This provides an unleashed model with the prompt: {prompt}")
 
     try:
 
         headers = {"Content-Type": "application/json"}
         res = requests.post(
-            'http://127.0.0.1:11434/api/generate',
-            json={"model": "llama3.2:1b", "prompt": prompt, "stream": False},
-            headers=headers,
-            timeout=20
+            'http://0.0.0.0:11434/api/generate',
+            json={"model": "llama3.2:1b", "prompt": prompt, "stream": False, "headers": headers},
+            timeout=100
             )
+        
+        storage_response.append(res)
+        
         res.raise_for_status()
     except requests.exceptions.RequestException as e:
         
@@ -35,3 +35,8 @@ def ask(prompt: str) -> Prompt:
         return Response(content=f"Error occurred: {e}", status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     return Response(content=res.text, media_type="application/json", status_code=status.HTTP_200_OK)
+
+@app.get("/", status_code=status.HTTP_200_OK)
+def health() -> dict:
+    return{"title": {app.title}, "description":{app.description}, "version": {app.version}}    
+
