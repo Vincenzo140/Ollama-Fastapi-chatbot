@@ -2,14 +2,23 @@ from fastapi import FastAPI, status, Response
 import requests
 from logger import AppLogger
 from typing import Union
+from fastapi.middleware.cors import CORSMiddleware
+    
+
+
+
 
 logger = AppLogger().get_logger()
 
 app = FastAPI(title="api do ollama", description="api que contempla o ollama com o modelo da meta llama3.2:1b, isso é apenas um setup, não ha treinamento de modelos", version= "v.0.0.10")
     
-# @app.get('/')
-# async def root():
-#     return {'message': 'Welcome to the FastAPI application!'}
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"]  # You can also specify specific headers here if needed.
+)
 
 storage_response = []
 
@@ -22,7 +31,7 @@ def ask(prompt: Union[str, int]):
         headers = {"Content-Type": "application/json"}
         res = requests.post(
             'http://0.0.0.0:11434/api/generate',
-            json={"model": "llama3.2:1b", "prompt": prompt, "stream": False, "headers": headers},
+            json={"model": "llama2-uncensored", "prompt": prompt, "stream": False, "headers": headers},
             timeout=100
             )
         
@@ -40,3 +49,6 @@ def ask(prompt: Union[str, int]):
 def health() -> dict:
     return{"title": {app.title}, "description":{app.description}, "version": {app.version}}    
 
+if __name__ == '__main__':
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000, reload= True)
