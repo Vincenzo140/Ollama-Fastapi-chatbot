@@ -4,8 +4,6 @@ services:
     build: .
     ports:
       - 8000:8000
-    env_file:
-      - .env
     networks:
       - default
 
@@ -16,7 +14,7 @@ services:
       - default-volume:/ollama
     networks:
       - default
-    entrypoint: ["env/bin/activate.fish", "/pull-llama3.2:1b.sh"]
+    entrypoint: ["/bin/bash", "-c", "./pull-llama3.2:1b.sh"]
 
 networks:
   default:

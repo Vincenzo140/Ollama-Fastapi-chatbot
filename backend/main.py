@@ -3,10 +3,6 @@ import requests
 from logger import AppLogger
 from typing import Union
 from fastapi.middleware.cors import CORSMiddleware
-    
-
-
-
 
 logger = AppLogger().get_logger()
 
@@ -31,10 +27,10 @@ def ask(prompt: Union[str, int]):
         headers = {"Content-Type": "application/json"}
         res = requests.post(
             'http://0.0.0.0:11434/api/generate',
-            json={"model": "llama2-uncensored", "prompt": prompt, "stream": False, "headers": headers},
+            json={"model": "llama3.2:1b", "prompt": prompt, "stream": False, "headers": headers},
             timeout=100
             )
-        
+
         storage_response.append(res)
         
         res.raise_for_status()
