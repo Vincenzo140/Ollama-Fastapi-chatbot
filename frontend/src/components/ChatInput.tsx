@@ -1,33 +1,58 @@
-import React from 'react';
-import { Send } from 'lucide-react';
+import { useState, KeyboardEvent } from 'react';
+import { Send, Square } from 'lucide-react';
 
 interface ChatInputProps {
-  input: string;
-  isLoading: boolean;
-  onSubmit: (e: React.FormEvent) => void;
-  onInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  isStreaming: boolean;
+  onSend: (text: string) => void;
+  onStop: () => void;
 }
 
-export function ChatInput({ input, isLoading, onSubmit, onInputChange }: ChatInputProps) {
+export function ChatInput({ isStreaming, onSend, onStop }: ChatInputProps) {
+  const [value, setValue] = useState('');
+
+  const submit = () => {
+    if (!value.trim() || isStreaming) return;
+    onSend(value);
+    setValue('');
+  };
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      submit();
+    }
+  };
+
   return (
-    <form onSubmit={onSubmit} className="p-4 border-t border-gray-700">
-      <div className="flex gap-2">
-        <input
-          type="text"
-          value={input}
-          onChange={onInputChange}
-          placeholder="Digite sua mensagem..."
-          className="flex-1 bg-gray-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          disabled={isLoading}
+    <div className="p-4 border-t border-gray-800">
+      <div className="flex gap-2 items-end">
+        <textarea
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder="Digite sua mensagem... (Enter envia, Shift+Enter quebra linha)"
+          rows={1}
+          className="flex-1 resize-none bg-gray-800 rounded-lg px-4 py-2 max-h-40 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
-        <button
-          type="submit"
-          disabled={isLoading || !input.trim()}
-          className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed p-2 rounded-lg transition-colors"
-        >
-          <Send className="w-5 h-5" />
-        </button>
+        {isStreaming ? (
+          <button
+            onClick={onStop}
+            className="bg-red-600 hover:bg-red-700 p-2.5 rounded-lg transition-colors"
+            aria-label="Parar geração"
+          >
+            <Square className="w-5 h-5" />
+          </button>
+        ) : (
+          <button
+            onClick={submit}
+            disabled={!value.trim()}
+            className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed p-2.5 rounded-lg transition-colors"
+            aria-label="Enviar"
+          >
+            <Send className="w-5 h-5" />
+          </button>
+        )}
       </div>
-    </form>
+    </div>
   );
 }

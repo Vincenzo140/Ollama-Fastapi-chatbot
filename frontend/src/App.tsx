@@ -1,98 +1,85 @@
-import React, { useState } from 'react';
-import { Message, SuggestionBlock as SuggestionBlockType } from './types';
+import { AlertTriangle } from 'lucide-react';
 import { Header } from './components/Header';
-import { SuggestionBlock } from './components/SuggestionBlock';
+import { Sidebar } from './components/Sidebar';
 import { ChatContainer } from './components/ChatContainer';
 import { ChatInput } from './components/ChatInput';
+import { SuggestionBlock } from './components/SuggestionBlock';
 import { suggestionBlocks } from './data/suggestionBlocks';
+import { useChat } from './hooks/useChat';
 
 function App() {
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [selectedMode, setSelectedMode] = useState<string | null>(null);
+  const {
+    models,
+    model,
+    setModel,
+    sessions,
+    currentSessionId,
+    messages,
+    isStreaming,
+    error,
+    newChat,
+    selectSession,
+    deleteSession,
+    sendMessage,
+    stop,
+  } = useChat();
 
-  const handleSuggestionClick = (suggestion: SuggestionBlockType) => {
-    setSelectedMode(suggestion.id);
-    const botMessage: Message = {
-      content: suggestion.prompt,
-      isBot: true,
-      timestamp: new Date()
-    };
-    setMessages([botMessage]);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim()) return;
-
-    const userMessage: Message = {
-      content: input,
-      isBot: false,
-      timestamp: new Date(),
-    };
-
-    setMessages(prev => [...prev, userMessage]);
-    setInput('');
-    setIsLoading(true);
-
-    try {
-      const response = await fetch(`http://192.168.0.9:8000/ask?prompt=${encodeURIComponent(input)}`);
-      const data = await response.json();
-
-      const botMessage: Message = {
-        content: data.response || 'Desculpe, não consegui processar sua solicitação.',
-        isBot: true,
-        timestamp: new Date(),
-      };
-
-      setMessages(prev => [...prev, botMessage]);
-    } catch (error) {
-      const errorMessage: Message = {
-        content: 'Desculpe, ocorreu um erro. Por favor, tente novamente.',
-        isBot: true,
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, errorMessage]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleReset = () => {
-    setSelectedMode(null);
-    setMessages([]);
-  };
+  const isEmpty = messages.length === 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white">
-      <div className="max-w-5xl mx-auto p-4 h-screen flex flex-col">
-        <Header selectedMode={selectedMode} onReset={handleReset} />
+    <div className="h-screen flex bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white">
+      <Sidebar
+        sessions={sessions}
+        currentSessionId={currentSessionId}
+        onNewChat={newChat}
+        onSelect={selectSession}
+        onDelete={deleteSession}
+      />
 
-        <div className="flex-1 overflow-y-auto py-4 space-y-4">
-          {!selectedMode ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
-              {suggestionBlocks.map((block) => (
-                <SuggestionBlock
-                  key={block.id}
-                  block={block}
-                  onClick={handleSuggestionClick}
-                />
-              ))}
+      <div className="flex-1 flex flex-col min-w-0">
+        <Header
+          models={models}
+          model={model}
+          modelLocked={isStreaming}
+          onModelChange={setModel}
+        />
+
+        <div className="flex-1 overflow-y-auto p-4">
+          {isEmpty ? (
+            <div className="max-w-4xl mx-auto">
+              <h2 className="text-2xl font-bold mb-1">Como posso ajudar?</h2>
+              <p className="text-gray-400 mb-6 text-sm">
+                Escolha um modo ou digite sua mensagem.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {suggestionBlocks.map((block) => (
+                  <SuggestionBlock
+                    key={block.id}
+                    block={block}
+                    onClick={(b) => sendMessage(b.prompt)}
+                  />
+                ))}
+              </div>
             </div>
           ) : (
-            <ChatContainer messages={messages} isLoading={isLoading} />
+            <div className="max-w-4xl mx-auto">
+              <ChatContainer messages={messages} isStreaming={isStreaming} />
+            </div>
           )}
         </div>
 
-        {selectedMode && (
-          <ChatInput
-            input={input}
-            isLoading={isLoading}
-            onSubmit={handleSubmit}
-            onInputChange={(e) => setInput(e.target.value)}
-          />
+        {error && (
+          <div className="max-w-4xl mx-auto w-full px-4">
+            <div className="flex items-center gap-2 bg-red-900/40 border border-red-700 rounded-lg px-3 py-2 text-sm text-red-200">
+              <AlertTriangle className="w-4 h-4 shrink-0" />
+              <span className="truncate">{error}</span>
+            </div>
+          </div>
         )}
+
+        <div className="max-w-4xl mx-auto w-full">
+          <ChatInput isStreaming={isStreaming} onSend={sendMessage} onStop={stop} />
+        </div>
       </div>
     </div>
   );
