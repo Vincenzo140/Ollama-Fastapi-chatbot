@@ -41,15 +41,28 @@ frontend/
 
 ## Como rodar
 
-### Opção A — Docker (tudo junto)
+### Opção A — Docker (tudo junto, recomendado)
+
+Com o **Docker Desktop aberto**, na raiz do projeto:
 
 ```sh
-cd backend
 docker compose up --build
 ```
 
-Sobe a API em `http://localhost:8000` e o Ollama em `http://localhost:11434`
-(baixando os modelos automaticamente na primeira execução).
+Isso sobe os três serviços de uma vez:
+
+| Serviço  | URL                      | Descrição                              |
+| -------- | ------------------------ | -------------------------------------- |
+| frontend | http://localhost:8080    | Interface do chat (abra esta)          |
+| api      | http://localhost:8000    | Backend FastAPI (`/docs` para a API)   |
+| ollama   | http://localhost:11434   | Servidor dos modelos                   |
+
+Na **primeira execução** o serviço `ollama` baixa os modelos automaticamente
+(alguns GB), então pode demorar. Os modelos ficam em um volume e não são
+baixados de novo nas próximas vezes.
+
+Para parar: `docker compose down` (ou `docker compose down -v` para apagar
+também os modelos e o banco).
 
 ### Opção B — Local
 
